@@ -1,21 +1,26 @@
 package GUI;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import Clases.Class_Encriptador;
-import java.util.Enumeration;
+import Clases.*;
 import javax.swing.JOptionPane;
+import java.io.*;
+import java.security.Key;
+import javax.swing.*;
 
 /**
  *
  * @author HP-001
  */
 public class GUI_Encriptador extends javax.swing.JFrame {
+    JFileChooser seleccionar = new JFileChooser();
+    File archivo;
+    Class_Archivos gestionArchivs = new Class_Archivos();
+    //---------------------------------
     public SecretKey claveSecreta;
     Class_Encriptador objEncriptador;
     
@@ -26,7 +31,7 @@ public class GUI_Encriptador extends javax.swing.JFrame {
     public String getMensage(){
         return txtMensage.getText();
     }
-    public String getMesafeEncrip(){
+    public String getMesageEncrip(){
         return txtMensageEncrip.getText();
     }
     
@@ -58,7 +63,7 @@ public class GUI_Encriptador extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        lblMensage = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtMensage = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -76,7 +81,7 @@ public class GUI_Encriptador extends javax.swing.JFrame {
 
         jLabel2.setText("MENSAGE A ENCRIPTAR");
 
-        jLabel3.setText("MENSAGE ENCRIPTADO");
+        lblMensage.setText("MENSAGE ");
 
         txtMensage.setColumns(20);
         txtMensage.setRows(5);
@@ -103,8 +108,18 @@ public class GUI_Encriptador extends javax.swing.JFrame {
         btnCopiar.setText("COPIR");
 
         btnSubir.setText("SUBIR ARCHIBO");
+        btnSubir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSubirActionPerformed(evt);
+            }
+        });
 
         btnGuardar.setText("GUARDAR ARCHIVO");
+        btnGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuardarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -124,7 +139,7 @@ public class GUI_Encriptador extends javax.swing.JFrame {
                 .addGap(125, 125, 125)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 456, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3)
+                    .addComponent(lblMensage)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnCopiar)
                         .addGap(18, 18, 18)
@@ -143,7 +158,7 @@ public class GUI_Encriptador extends javax.swing.JFrame {
                 .addGap(66, 66, 66)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel3))
+                    .addComponent(lblMensage))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -175,6 +190,7 @@ public class GUI_Encriptador extends javax.swing.JFrame {
                 objEncriptador.setTextEncrictado(Encriptar(objEncriptador.getTextOriginar(), claveSecreta));
                 
                 txtMensageEncrip.setText(objEncriptador.getEncritado());
+                lblMensage.setText("MESAGE ENCRPTADO");
                 
             } catch (Exception ex) {
                 Logger.getLogger(GUI_Encriptador.class.getName()).log(Level.SEVERE, null, ex);
@@ -192,12 +208,45 @@ public class GUI_Encriptador extends javax.swing.JFrame {
                 
                 objEncriptador.setTextDesencritado(Desencriptar(objEncriptador.getEncritado(), claveSecreta));
                 txtMensageEncrip.setText(objEncriptador.getTextDesencritado());
+                lblMensage.setText("MESAGE DESENCRPTADO");
                 
             } catch (Exception ex) {
                 Logger.getLogger(GUI_Encriptador.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_btnDesencritarActionPerformed
+
+    private void btnSubirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubirActionPerformed
+        if(seleccionar.showDialog(this, "ABRIR ARCHIVO") == JFileChooser.APPROVE_OPTION){
+            archivo = seleccionar.getSelectedFile();
+            if (archivo.canRead()) {
+                if (archivo.getName().endsWith(".txt")) {
+                    String contenido = gestionArchivs.AbrirArchivo(archivo);
+                    txtMensage.setText(contenido);
+                }
+            }
+        }
+    }//GEN-LAST:event_btnSubirActionPerformed
+
+    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        if(!getMesageEncrip().equals("")){
+            try {
+                SecretKey clave = objEncriptador.getClaveSecrta();
+                String texto = txtMensageEncrip.getText();
+                
+                JFileChooser fileChooser = new JFileChooser();
+                int seleccion = fileChooser.showSaveDialog(this);
+                
+                if (seleccion == JFileChooser.APPROVE_OPTION) {
+                    String rutaArchivo = fileChooser.getSelectedFile().getAbsolutePath();
+                    gestionArchivs.GuardarArchivo(rutaArchivo, texto, clave);
+                    JOptionPane.showMessageDialog(this, "Texto cifrado y clave guardados correctamente.");
+                }
+                
+            } catch (Exception e) {
+            }
+        }
+    }//GEN-LAST:event_btnGuardarActionPerformed
 
     
 
@@ -209,9 +258,9 @@ public class GUI_Encriptador extends javax.swing.JFrame {
     private javax.swing.JButton btnSubir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblMensage;
     private javax.swing.JTextArea txtMensage;
     private javax.swing.JTextArea txtMensageEncrip;
     // End of variables declaration//GEN-END:variables

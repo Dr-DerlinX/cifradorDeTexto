@@ -1,5 +1,6 @@
 package Clases;
 import java.io.*;
+import java.security.Key;
 /**
  *
  * @author HP-001
@@ -28,20 +29,13 @@ public class Class_Archivos {
         return contenido;
     } 
     
-    public String GuardarArchivo(File archivo, String contenido){
-        
-        String respuesta = null;
-        
-        try {
+    public void GuardarArchivo(String nombreArchivo, String texto, Key clave) throws IOException{
+        try(BufferedWriter write = new BufferedWriter(new FileWriter(nombreArchivo))){
+            write.write("Texto cfrado : " + texto);
+            write.newLine();
             
-            salida = new FileOutputStream(archivo);
-            byte[] byteText = contenido.getBytes();
-            salida.write(byteText);
-            respuesta = "Se a guardado correcta mente...!";
-            
-        } catch (Exception e) {
+            write.write("Clave : " + java.util.Base64.getEncoder().encodeToString(clave.getEncoded()));
         }
-        return respuesta;
     }
     
 }
